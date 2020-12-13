@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:ontext="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
+    <!--1. 关联数据库配置文件-->
+    <ontext:property-placeholder location="database.properties"/>
+    <!--2  连接池
+    dhcp ：半自动化操作
+    c3p0:自动化加载
+    druid:
+    hikari:
+    -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}" />
+        <property name="jdbcUrl" value="${jdbc.url}" />
+        <property name="user" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="maxPoolSize" value="10" /><!--连接池个数-->
+        <property name="minPoolSize" value="5" />
+
+        <property name="autoCommitOnClose" value="false"/> <!--关闭连接后不自动提交-->
+        <property name="checkoutTimeout" value="30"/><!--获取链接超时时间-->
+        <property name="acquireRetryAttempts" value="2"/><!--获取连接失败重试次数-->
+
+    </bean>
+
+    <!--3.sqlsessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--绑定 mybatis 配置文件-->
+        <property name="configLocation" value="mybatis-config.xml"/>
+    </bean>
+    <!--4. 配置 dao 接口扫描包 注册到  spring 中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <!--要扫描的包-->
+        <property name="basePackage" value="com.he.dao"/>
+    </bean>
+</beans>
